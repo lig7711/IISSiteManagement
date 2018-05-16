@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiteManagement", "SiteManagement\SiteManagement.csproj", "{BF56D001-EA4E-4233-AE5D-B9E7C6B2C83D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automation.Common", "Automation.Common", "{E39D4A12-9F62-4099-8BC0-B6C91C0B7935}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Common", "Automation.Common\Automation.Common.csproj", "{226995F1-975D-4D41-B25C-2C868541A6CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF56D001-EA4E-4233-AE5D-B9E7C6B2C83D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF56D001-EA4E-4233-AE5D-B9E7C6B2C83D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF56D001-EA4E-4233-AE5D-B9E7C6B2C83D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF56D001-EA4E-4233-AE5D-B9E7C6B2C83D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{226995F1-975D-4D41-B25C-2C868541A6CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{226995F1-975D-4D41-B25C-2C868541A6CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{226995F1-975D-4D41-B25C-2C868541A6CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{226995F1-975D-4D41-B25C-2C868541A6CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{226995F1-975D-4D41-B25C-2C868541A6CF} = {E39D4A12-9F62-4099-8BC0-B6C91C0B7935}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+		SolutionGuid = {FEB415AF-479E-4C59-8BE7-5AC9EDD9ED83}
+	EndGlobalSection
+EndGlobal

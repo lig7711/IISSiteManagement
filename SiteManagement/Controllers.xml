@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--every object should add this node<property name="FunctionService" ref="FunctionService" />-->
+<objects default-lazy-init="true" xmlns="http://www.springframework.net">
+  <!--Base-->
+
+  <object type="SiteManagement.Controllers.SiteCoreController, SiteManagement" singleton="false" >
+    <!--<property name="_userService" ref="UserService" />-->
+  </object>
+</objects>

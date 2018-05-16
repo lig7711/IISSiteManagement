@@ -1,0 +1,454 @@
+﻿
+@{ 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <div class="pageTitle">
+        <div class="left">
+            <span class="titleName">IIS服务器站点管理</span>
+        </div>
+        <div class="right">
+            <div class="form-group" style="float:left;">
+                <div class="col-lg-12">
+                    <button type="submit" id="btn_CreateNewSite" disabled="disabled" class="btn  btn-primary"><i class="fa fa-plus-square-o"></i>添加</button>
+                    <button type="submit" id="btn_ExportExcel"  disabled="disabled" class="btn  btn-primary"><i class="fa fa-plus-square-o"></i>导出</button>
+                </div>
+            </div>
+            <div class="input-group" style="float:left;">
+                <div class="col-lg-12" style="margin-top: 8px;">
+                    <input type="text" class="form-control" id="SiteName" placeholder="请输站点名称关键字" style="width: 213px;height: 35px;margin-top: -8px;" >
+                    <button class="btn" type="button" id="btnSearch" style="margin-left: -3px;background-color: #fff;border: 1px solid #1ab394;color: #000;margin-top: -8px;">查询</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="EasyTable"></div>
+    <div id="dialog-confirm-del" class="hide">
+        <div class="form-group">
+            <div class="col-lg-12">
+                <form class="form-horizontal" role="form" method="post">
+                    <div class="note note-warning">
+                        您是否确定执行该操作?
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="data-add-update" style="display: none;overflow: hidden">
+        <div class="form-group">
+            <div class="col-lg-12">
+                <form class="form-horizontal data-regionform" role="form" method="post">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" style="text-align: right">注册手机号:</label>
+                        <div class="col-sm-8">
+                            <input type="text" check-type="tel" class="form-control divtextarea" maxlength="100" id="LogonPhoneNum" name="LogonPhoneNum" placeholder="This textarea has a limit of 500 chars."></input>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" style="text-align: right">要修改手机号:</label>
+                        <div class="col-sm-8">
+                            <input type="text" check-type="tel" class="form-control divtextarea" maxlength="100" id="ModifyPhoneNum" name="ModifyPhoneNum" placeholder="This textarea has a limit of 500 chars."></input>
+                        </div>
+                    </div>
+                    <div class="form-group" id="dateDiv">
+                        <label class="col-sm-3 control-label" style="text-align: right">日期:</label>
+                        <div class="col-sm-8">
+                            <div id="chooseDate" class="input-group date form_date" style="float:left;width:100%;" data-date="" data-date-format="yyyy/mm/dd" data-link-field="txtSLAStartDate" data-link-format="yyyy-mm-dd">
+                                <span class="input-group-addon" style="background-color: #fff;">
+                                    <em class="glyphicon glyphicon-calendar" style="display:none"></em>
+                                    <em class="fa fa-calendar-o" aria-hidden="true"></em>
+                                </span>
+                                <input check-type="required" class="form-control" id="Date" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" style="text-align: right">描述:</label>
+                        <div class="col-sm-8">
+                            <textarea check-type="maxLength_0-90" class="form-control divtextarea" maxlength="100" id="Comment" name="Comment" placeholder="This textarea has a limit of 500 chars."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" style="text-align: right">职场:</label>
+                        <div class="col-sm-8">
+                            <input type="text" check-type="required" class="form-control divtextarea" maxlength="100" id="Workplace" name="Workplace" placeholder="This textarea has a limit of 500 chars."></input>
+                        </div>
+                    </div>
+                    @Html.Hidden("checkId", "0")
+                </form>
+            </div>
+        </div>
+    </div>
+
+@* 站点列表处理脚本 *@
+<script type="text/javascript">
+        var columns = [
+            { field: 'NO', title: 'SiteID', width: 50, align: 'center' },
+            {
+                field: 'Start', title: '启动', width: 60, align: 'center',
+                formatter:
+                    function (value, rowData) {
+                        var re = "";
+                        if (rowData.SiteStatus == "Started") {
+                            re = "<a class=\"data-fresh\" title=\"已经启动\"><li class=\"fa fa-ban\"></li></a>";
+                        } else if (rowData.SiteStatus == "Stopped") {
+                            re = "<a class=\"data-fresh\" onclick=\"StartSite('" + rowData.SiteID + "')\" title=\"启用\"><li class=\"fa fa-check\"></li></a>";
+                        } 
+                        return re;
+                    }
+            },
+            {
+                field: 'Stop', title: '停止', width: 60, align: 'center',
+                formatter:
+                    function (value, rowData) {
+                        var re = "";
+                        if (rowData.SiteStatus == "Stopped") {
+                            re = "<a class=\"data-fresh\" title=\"已经停止\"><li class=\"fa fa-ban\"></li></a>";
+                        } else if (rowData.SiteStatus == "Started") {
+                            re = "<a class=\"data-fresh\" onclick=\"StopSite('" + rowData.SiteID + "')\" title=\"停用\"><li class=\"fa fa-check\"></li></a>";
+                        }
+                        return re;
+                    }
+            },
+            {
+                field: 'Reset', title: '重启', width: 60, align: 'center',
+                formatter:
+                    function (value, rowData) {
+                        var re = "";
+                        re = "<a class=\"data-fresh\" onclick=\"ResetSite('" + rowData.SiteID + "')\" title=\"重新启动\"><li class=\"fa fa-refresh\"></li></a>";
+                        return re;
+                    }
+            },
+            {
+                field: 'SiteName', title: '站点名称', align: 'left', Edit: "false", width: 200
+            },
+            {
+                field: 'SiteFullPath', title: '站点全路径', align: 'left', Edit: "false", width: 400
+            },
+            {
+                field: 'BindingUrls', title: '站点URL', align: 'left', Edit: "false", width: 300,
+                formatter:
+                    function (value, rowData) {
+                        var re = "";
+                        value.forEach((item) => { re += '<a href="' + item.ClickLink + '" target=\"_blank\">' + item.ClickLink + '</a><br/>' })
+                        //re = '<a class="data-fresh" onclick="DelBaseType(' + rowData.Id + ')"><li class=\"fa fa-trash-o\"></li></a> ';
+                        return re;
+                    }
+            },
+        ]
+        var PageConfig = {
+            url: "@Url.Action("QuerySite", "SiteCore")", //ajax请求地址，必填
+            data: "" //ajax请求参数，可为空，为空默认空字符串
+        }
+
+        $(function () {
+            //初始化
+            Initialization("EasyTable", PageConfig, columns);
+            //搜索
+            $("#btnSearch")
+                .click(function () {
+                    var name = $("#SiteName").val();
+                    var data = ",SiteName:\"" + name + "\"";
+                    PageConfig.data = data;
+                    Initialization("EasyTable", PageConfig, columns);
+                    $("#SiteName").val("");
+                });
+
+            $("#SiteName")
+                .keyup(function (e) {
+                    if (e.keyCode == 13) {
+                        var name = $("#SiteName").val();
+                        var data = ",SiteName:\"" + name + "\"";
+                        PageConfig.data = data;
+                        Initialization("EasyTable", PageConfig, columns);
+                        $("#SiteName").val("");
+                    }
+                });
+    })
+
+    var SearchFun = function () {
+        var name = $("#SiteName").val();
+        var data = ",SiteName:\"" + name + "\"";
+        PageConfig.data = data;
+        Initialization("EasyTable", PageConfig, columns);
+        $("#SiteName").val("");
+    }
+    </script>
+@* 站点操作接口 *@
+<script>
+        //启动站点
+        function StartSite(id) {
+            if (!id) {
+                AlertInfo("Id不能为空",false)
+                return;
+            }
+            var dialog = $("#dialog-confirm-del").removeClass('hide').dialog({ modal: true, title: "启动站点", title_html: true, width: 320, height: 200,
+                buttons: [
+                    {
+                        text: "确定", "class": "btn btn-danger",
+                        click: function () {
+                            $.ajax({
+                                type: 'POST', url: "@Url.Action("StartSite", "SiteCore")", data: { SiteID: id },
+                                success: function (data) {
+                                    if (data.Success) {
+                                        AlertInfo(data.Message, true)
+                                        Initialization("EasyTable", PageConfig, columns);
+                                        dialog.dialog("close");
+                                    } else {
+                                        AlertInfo(data.Message, false);
+                                        dialog.dialog("close");
+                                    }
+                                },
+                                error: function (XMLResponse) {
+                                    AlertInfo(XMLResponse.responseText, false);
+                                    dialog.dialog("close");
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text: "取消", "class": "btn", click: function () { $(this).dialog("close"); }
+                    }
+                    ]
+                });
+    }
+
+            //停用站点
+        function StopSite(id) {
+            if (!id) {
+                AlertInfo("Id不能为空",false)
+                return;
+            }
+            var dialog = $("#dialog-confirm-del").removeClass('hide').dialog({ modal: true, title: "停用站点", title_html: true, width: 320, height: 200,
+                buttons: [
+                    { text: "确定", "class": "btn btn-danger",
+                            click: function () {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "@Url.Action("StopSite", "SiteCore")",
+                                    data: { SiteID: id },
+                                    success: function (data) {
+                                        if (data.Success) {
+                                            AlertInfo(data.Message, true)
+                                            Initialization("EasyTable", PageConfig, columns);
+                                            dialog.dialog("close");
+                                        } else {
+                                            AlertInfo(data.Message, false);
+                                            dialog.dialog("close");
+                                        }
+                                    },
+                                    error: function (XMLResponse) {
+                                        AlertInfo(XMLResponse.responseText, false);
+                                        dialog.dialog("close");
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            text: "取消",
+                            "class": "btn",
+                            click: function () {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ]
+                });
+        }
+
+            //重启站点
+        function ResetSite(id) {
+            if (!id) {
+                AlertInfo("Id不能为空",false)
+                return;
+            }
+            var dialog = $("#dialog-confirm-del").removeClass('hide').dialog({ modal: true, title: "重启站点", title_html: true, width: 320, height: 200,
+                buttons: [
+                    { text: "确定", "class": "btn btn-danger",
+                            click: function () {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "@Url.Action("RestartSite", "SiteCore")",
+                                    data: { SiteID: id },
+                                    success: function (data) {
+                                        if (data.Success) {
+                                            AlertInfo(data.Message, true)
+                                            Initialization("EasyTable", PageConfig, columns);
+                                            dialog.dialog("close");
+                                        } else {
+                                            AlertInfo(data.Message, false);
+                                            dialog.dialog("close");
+                                        }
+                                    },
+                                    error: function (XMLResponse) {
+                                        AlertInfo(XMLResponse.responseText, false);
+                                        dialog.dialog("close");
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            text: "取消",
+                            "class": "btn",
+                            click: function () {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ]
+                });
+        }
+
+</script>
+@* 通用脚本*@
+<script>
+//导出Excel
+$("#btn_ExportExcel").click(function () {
+    $.ajax({
+        type: "GET",
+        url: "@Url.Action("ExportExcelFile", "PassengerModifyPhone")",
+        success: function (data) {
+            window.location = '/PassengerModifyPhone/DownloadExportReport' + "?fileName=" + data.Result;
+
+        },
+        error: function (XMLResponse) {
+            AlertInfo(XMLResponse.responseText, false);
+        }
+
+    })
+})
+//修改
+function Edit(id) {
+    if (id == "") {
+        AlertInfo("Id不能为空", false);
+        return;
+    }
+    CleanInput();
+
+    $.ajax({
+        type: 'POST',
+        url: "@Url.Action("GetDataById", "PassengerModifyPhone")",
+        data: { id: id },
+        success: function (data) {
+            if (data.Success) {
+                var d = data.Result;
+                $("#checkId").val(id);
+                $("#Date").val(d.IndexDate);
+                $("#LogonPhoneNum").val(d.LogonPhoneNum);
+                $("#ModifyPhoneNum").val(d.ModifyPhoneNum);
+                $("#Comment").val(d.Comment);
+                $("#Workplace").val(d.Workplace);
+                Dialog("修改数据", "@Url.Action("AddDataToDB", "PassengerModifyPhone")", true);
+            } else {
+                AlertInfo(data.Message, false);
+            }
+        },
+        error: function (XMLResponse) { AlertInfo(XMLResponse.responseText,false); }
+    });
+}
+    //添加
+$("#btn_CreateNewSite")
+    .click(function () {
+        CleanInput();
+        Dialog("添加数据", "@Url.Action("AddNewSite", "SiteManagement")", true);
+    });
+    //添加/修改 dialog
+    //公用dialog
+    function Dialog(title, url, loadPage) {
+        onloadClearDanger($(".data-add-update"));
+        var dialog = $(".data-add-update")
+            .removeClass('hide')
+            .dialog({
+                modal: true,
+                title: title,
+                title_html: true,
+                width: 550,
+                height: 410,
+                buttons: [
+                    {
+                        text: "提交",
+                        "class": "btn btn-danger",
+                        click: function () {
+                            if (!submitCheck("data-add-update")) {
+                                return;
+                            }
+                            var checkId = $("#checkId").val();
+                            var date = $("#Date").val();
+                            var logonPhoneNum = $("#LogonPhoneNum").val();
+                            var modifyPhoneNum = $("#ModifyPhoneNum").val();
+                            var comment = $("#Comment").val();
+                            var workplace = $("#Workplace").val();
+                            //if (logonPhoneNum == undefined || logonPhoneNum == null || logonPhoneNum == "") {
+                            //    AlertInfo("请输入注册手机号", false);
+                            //    return;
+                            //}
+                            //if (modifyPhoneNum == undefined || modifyPhoneNum == null || modifyPhoneNum == "") {
+                            //    AlertInfo("请输入修改手机号",false);
+                            //    return;
+                            //}
+                            //if (date == undefined || date == null || date == "") {
+                            //    AlertInfo("请输入时间", false);
+                            //    return;
+                            //}
+                            //if (workplace == undefined || workplace == null || workplace == "") {
+                            //    AlertInfo("请输入职场", false);
+                            //    return;
+                            //}
+                            //if (comment != "" && comment.length > 500) {
+                            //    AlertInfo("描述信息字符不能超过500", false);
+                            //    return;
+                            //}
+
+                            $.ajax({
+                                type: 'POST',
+                                url: url,
+                                data: {
+                                    Id: checkId, Date: date, LogonPhoneNum: logonPhoneNum, ModifyPhoneNum: modifyPhoneNum,
+                                    Comment: comment, Workplace: workplace
+                                },
+                                success: function (data) {
+                                    if (data.Success) {
+                                        AlertInfo(data.Message, true);
+                                        //重新加载
+                                        if (loadPage) {
+                                            Initialization("EasyTable", PageConfig, columns);
+                                        }
+                                    } else {
+                                        AlertInfo(data.Message, false);
+                                    }
+                                },
+                                error: function (XMLResponse) { AlertInfo(XMLResponse.responseText, false); }
+                            });
+                            $(this).dialog("close");
+                        }
+                    },
+                    {
+                        text: "取消",
+                        "class": "btn",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
+    }
+    function showWait() {
+        $("#showDiv").show();
+    }
+
+    function clearWait() {
+        $("#showDiv").hide();
+    }
+
+    //清空输入信息
+    function CleanInput() {
+        $("#Name").val("");
+        var comment = $("#Comment").val("");
+        $("#checkId").val("");
+        $("#Date").val("");
+        $("#LogonPhoneNum").val("");
+        $("#ModifyPhoneNum").val("");
+        $("#Comment").val("");
+        $("#Workplace").val("");
+    }
+
+</script>
