@@ -14,7 +14,7 @@
 下载源码编译成功后，发布在需要管理的IIS上
 需要重点强调细节：独立创建该站点，并创建自己程序池，并在程序池高级设置中 将  进程模型->标识 修改为LocalSystem，这样该站点才可以获取到访问IIS的权限
 
-![Alt text](https://github.com/lig7711/IISSiteManagement/edit/master/IISSite.png)
+![Alt text](https://github.com/lig7711/IISSiteManagement/blob/master/IISSite.png)
 
 后续感觉还可以在这个站点上做很多事情
 比如创建站点，对程序池的管理.......目前这个功能对于自己暂时够用，如果有感兴趣的朋友，可以追加新功能持续迭代......
